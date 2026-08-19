@@ -1,0 +1,143 @@
+.container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+
+.dark {
+  background-color: rgba(18, 18, 22, 0.85);
+}
+
+.light {
+  background-color: rgba(255, 255, 255, 0.85);
+}
+
+.clockFace {
+  width: 100%;
+  height: 100%;
+}
+
+.faceCircle {
+  fill: transparent;
+}
+
+.dark .faceCircle {
+  stroke: rgba(255, 255, 255, 0.1);
+}
+
+.light .faceCircle {
+  stroke: rgba(0, 0, 0, 0.08);
+}
+
+.hourTick {
+  stroke-linecap: round;
+}
+
+.dark .hourTick {
+  stroke: rgba(255, 255, 255, 0.35);
+}
+
+.light .hourTick {
+  stroke: rgba(0, 0, 0, 0.35);
+}
+
+.minuteTick {
+  stroke-linecap: round;
+}
+
+.dark .minuteTick {
+  stroke: rgba(255, 255, 255, 0.15);
+}
+
+.light .minuteTick {
+  stroke: rgba(0, 0, 0, 0.15);
+}
+
+.hourHand {
+  stroke-linecap: round;
+}
+
+.dark .hourHand {
+  stroke: #f2f2f2;
+}
+
+.light .hourHand {
+  stroke: #1c1c1e;
+}
+
+.minuteHand {
+  stroke-linecap: round;
+}
+
+.dark .minuteHand {
+  stroke: #f2f2f2;
+}
+
+.light .minuteHand {
+  stroke: #1c1c1e;
+}
+
+.secondHand {
+  stroke: #ff8a3d;
+  stroke-linecap: round;
+}
+
+.centerDot {
+  fill: #ff8a3d;
+}
+
+.weatherComplication {
+  pointer-events: none;
+}
+
+.weatherIcon {
+  font-size: 18px;
+}
+
+.weatherTemp {
+  font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.dark .weatherTemp {
+  fill: #f2f2f2;
+}
+
+.light .weatherTemp {
+  fill: #1c1c1e;
+}
+
+.weatherCondition {
+  font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+  font-size: 9px;
+  font-weight: 400;
+}
+
+.dark .weatherCondition {
+  fill: rgba(255, 255, 255, 0.6);
+}
+
+.light .weatherCondition {
+  fill: rgba(0, 0, 0, 0.6);
+}
+
+.weatherHighLow {
+  font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+  font-size: 8px;
+  font-weight: 400;
+}
+
+.dark .weatherHighLow {
+  fill: rgba(255, 255, 255, 0.4);
+}
+
+.light .weatherHighLow {
+  fill: rgba(0, 0, 0, 0.4);
+}

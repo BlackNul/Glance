@@ -1,0 +1,77 @@
+# .opencoderules — Chip Weather Clock Widget
+
+Development standards and guardrails for this project. Read this before generating or editing code.
+
+## Language & Type Safety
+
+- TypeScript everywhere, `strict: true` in tsconfig. No `any` — use `unknown` + narrowing, or proper generics.
+- All IPC channel payloads must have a shared TypeScript type/interface used by both main and renderer sides — never send untyped objects over IPC.
+- Prefer explicit return types on exported functions.
+
+## Project Structure
+
+```
+/src
+  /main            # Electron main process only
+    windowManager.ts
+    tray.ts
+    settingsStore.ts
+    weatherService.ts
+    autoLaunch.ts
+    /ipc
+  /renderer
+    /chip           # Chip window React app
+    /display        # Display window React app
+    /shared         # Shared components/hooks/types used by both renderers
+  /shared           # Types/constants shared between main and renderer (IPC contracts, settings schema)
+/docs               # PRD.md, Architecture.md, Design.md, Phase.md live here (or repo root)
+```
+
+- Renderer code must never import Node/Electron APIs directly — only via the typed `contextBridge` preload API. `nodeIntegration: false`, `contextIsolation: true` on every `BrowserWindow`, no exceptions.
+- Main process owns all network calls (weather API) and all filesystem access (settings). Renderers are pure UI + IPC consumers.
+
+## Security
+
+- No secrets, API keys, or tokens committed to source control. Use `.env` (gitignored) for local dev; document required env vars in README, never hardcode.
+- `.gitignore` must include: `node_modules`, `dist`, `out`, `.env`, `*.log`, OS/editor cruft (`.DS_Store`, `Thumbs.db`, `.vscode` if user-specific).
+- Validate/sanitize any data coming from the weather API before rendering (don't trust external JSON shape blindly — parse with a schema check, e.g. zod, or at minimum explicit type guards).
+
+## Performance
+
+- No `setInterval` polling loops in renderer code for anything visual that can instead be driven by `requestAnimationFrame` (e.g. watch hands) — but keep RAF loops running only while the relevant window is visible/expanded. Pause RAF when the Display window is collapsed/hidden.
+- Chip's digital clock may use a 1-second `setInterval` — that one is cheap and fine.
+- Weather refresh interval must never be hardcoded below 5 minutes (respect free-tier API limits even if the provider is generous).
+- Any new dependency should be justified — this is a small always-running background app; avoid heavy libraries for small problems (e.g., don't pull in a full charting or animation library for a single SVG clock face).
+
+## Code Style
+
+- Functional React components + hooks only, no class components.
+- CSS Modules per component (`Component.module.css`), no inline style objects for anything reused or animated — keep transitions in CSS, not JS, where possible.
+- One component per file; colocate a component's styles and (if any) tests next to it.
+- Comment *why*, not *what* — code should read clearly enough that comments explain non-obvious decisions (e.g. "two windows instead of one, see Architecture.md §2"), not restate the line below them.
+
+## Testing (lightweight — personal project, but not zero)
+
+- Unit test pure logic: hand-angle calculation for the analog face, weather-response parsing/mapping, settings schema validation.
+- No requirement for full E2E/UI test coverage given solo-use scope — manual QA against Design.md is acceptable for visual/animation correctness.
+
+## Git & Commits
+
+- Small, scoped commits; one logical change per commit.
+- Conventional commit prefixes encouraged (`feat:`, `fix:`, `chore:`, `docs:`) but not strictly enforced solo.
+- Do not commit `dist/`, `out/`, or any packaged build artifacts.
+
+## Definition of Done (per feature)
+
+A feature from Phase.md is done when:
+1. It matches the relevant PRD.md requirement.
+2. It matches Design.md visually (spacing/color/motion) in both light and dark theme.
+3. It has no `any` types and no direct Node API usage from renderer code.
+4. It doesn't regress idle CPU/memory (spot-check Task Manager before/after for anything touching the render loop).
+5. It survives a restart of the app (settings/position persistence intact) where relevant.
+
+## Do Not
+
+- Do not add telemetry, analytics, or any network call other than the weather API and (later, if implemented) the update checker.
+- Do not introduce a global state library (Redux/MobX/Zustand) unless a real cross-cutting state problem shows up — React context is sufficient at this scope.
+- Do not block the main process event loop with synchronous file I/O on the hot path (use async fs APIs).

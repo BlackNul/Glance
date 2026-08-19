@@ -1,0 +1,30 @@
+{
+  "name": "glance",
+  "version": "1.0.0",
+  "description": "Chip Weather Clock Widget for Windows Desktop",
+  "main": "main.js",
+  "scripts": {
+    "dev": "vite build && electron .",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "electron:dev": "vite --mode electron && electron .",
+    "electron:build": "vite build && electron-builder"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^6.0.5",
+    "electron": "^43.4.0",
+    "electron-builder": "^26.15.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.1",
+    "wait-on": "^9.1.0"
+  }
+}
