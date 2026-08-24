@@ -11,8 +11,8 @@
 }
 
 .panel {
-  width: 280px;
-  max-height: 340px;
+  width: 248px;
+  max-height: 248px;
   border-radius: 14px;
   display: flex;
   flex-direction: column;
@@ -33,6 +33,27 @@
   border: 1px solid rgba(0, 0, 0, 0.1);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   color: #1c1c1e;
+}
+
+.night .panel {
+  background: #0f1628;
+  border: 1px solid rgba(107, 163, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+  color: #a8c8ff;
+}
+
+.day .panel {
+  background: #f5f0e8;
+  border: 1px solid rgba(44, 36, 32, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  color: #2c2420;
+}
+
+.midday .panel {
+  background: #f8f2e0;
+  border: 1px solid rgba(107, 74, 0, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  color: #4a3820;
 }
 
 .header {
@@ -69,6 +90,10 @@
 .light .closeBtn {
   color: #1c1c1e;
 }
+
+.night .closeBtn { color: #a8c8ff; }
+.day .closeBtn { color: #2c2420; }
+.midday .closeBtn { color: #4a3820; }
 
 .body {
   flex: 1;
@@ -126,6 +151,13 @@
   border-color: rgba(26, 51, 32, 0.4);
 }
 
+.night .input { background: rgba(107, 163, 255, 0.06); color: #a8c8ff; }
+.night .input:focus { border-color: rgba(107, 163, 255, 0.4); }
+.day .input { background: rgba(44, 36, 32, 0.05); color: #2c2420; }
+.day .input:focus { border-color: rgba(44, 36, 32, 0.3); }
+.midday .input { background: rgba(107, 74, 0, 0.05); color: #4a3820; }
+.midday .input:focus { border-color: rgba(107, 74, 0, 0.3); }
+
 .spinner {
   position: absolute;
   right: 8px;
@@ -167,6 +199,10 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+.night .results { background: #0c1220; border: 1px solid rgba(107, 163, 255, 0.1); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); }
+.day .results { background: #faf6ee; border: 1px solid rgba(44, 36, 32, 0.1); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+.midday .results { background: #fdf8ec; border: 1px solid rgba(107, 74, 0, 0.1); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); }
+
 .resultItem {
   display: block;
   width: 100%;
@@ -194,6 +230,73 @@
 
 .light .resultItem:hover {
   background: rgba(0, 0, 0, 0.04);
+}
+
+.night .resultItem { color: #a8c8ff; }
+.night .resultItem:hover { background: rgba(107, 163, 255, 0.06); }
+.day .resultItem { color: #2c2420; }
+.day .resultItem:hover { background: rgba(44, 36, 32, 0.04); }
+.midday .resultItem { color: #4a3820; }
+.midday .resultItem:hover { background: rgba(107, 74, 0, 0.04); }
+
+.detectBtn {
+  width: 100%;
+  padding: 5px 8px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-top: 4px;
+}
+
+.dark .detectBtn {
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.5);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.dark .detectBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dark .detectBtn.active {
+  background: rgba(51, 255, 102, 0.12);
+  color: #33ff66;
+  border-color: rgba(51, 255, 102, 0.25);
+}
+
+.light .detectBtn {
+  background: rgba(0, 0, 0, 0.04);
+  color: rgba(0, 0, 0, 0.4);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+.light .detectBtn:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.light .detectBtn.active {
+  background: rgba(26, 51, 32, 0.1);
+  color: #1a3320;
+  border-color: rgba(26, 51, 32, 0.25);
+}
+
+.night .detectBtn { background: rgba(107, 163, 255, 0.04); color: rgba(107, 163, 255, 0.5); border-color: rgba(107, 163, 255, 0.06); }
+.night .detectBtn:hover { background: rgba(107, 163, 255, 0.08); }
+.night .detectBtn.active { background: rgba(107, 163, 255, 0.12); color: #6ba3ff; border-color: rgba(107, 163, 255, 0.25); }
+.day .detectBtn { background: rgba(44, 36, 32, 0.04); color: rgba(44, 36, 32, 0.4); border-color: rgba(44, 36, 32, 0.06); }
+.day .detectBtn:hover { background: rgba(44, 36, 32, 0.06); }
+.day .detectBtn.active { background: rgba(44, 36, 32, 0.1); color: #2c2420; border-color: rgba(44, 36, 32, 0.25); }
+.midday .detectBtn { background: rgba(107, 74, 0, 0.04); color: rgba(107, 74, 0, 0.4); border-color: rgba(107, 74, 0, 0.06); }
+.midday .detectBtn:hover { background: rgba(107, 74, 0, 0.06); }
+.midday .detectBtn.active { background: rgba(107, 74, 0, 0.1); color: #6b4a00; border-color: rgba(107, 74, 0, 0.25); }
+
+.detectBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .toggleGroup {
@@ -245,6 +348,16 @@
   border-color: rgba(26, 51, 32, 0.25);
 }
 
+.night .toggleBtn { background: rgba(107, 163, 255, 0.04); color: rgba(107, 163, 255, 0.5); border-color: rgba(107, 163, 255, 0.06); }
+.night .toggleBtn:hover { background: rgba(107, 163, 255, 0.08); }
+.night .toggleBtn.active { background: rgba(107, 163, 255, 0.12); color: #6ba3ff; border-color: rgba(107, 163, 255, 0.25); }
+.day .toggleBtn { background: rgba(44, 36, 32, 0.04); color: rgba(44, 36, 32, 0.4); border-color: rgba(44, 36, 32, 0.06); }
+.day .toggleBtn:hover { background: rgba(44, 36, 32, 0.06); }
+.day .toggleBtn.active { background: rgba(44, 36, 32, 0.1); color: #2c2420; border-color: rgba(44, 36, 32, 0.25); }
+.midday .toggleBtn { background: rgba(107, 74, 0, 0.04); color: rgba(107, 74, 0, 0.4); border-color: rgba(107, 74, 0, 0.06); }
+.midday .toggleBtn:hover { background: rgba(107, 74, 0, 0.06); }
+.midday .toggleBtn.active { background: rgba(107, 74, 0, 0.1); color: #6b4a00; border-color: rgba(107, 74, 0, 0.25); }
+
 .select {
   padding: 5px 8px;
   border-radius: 6px;
@@ -266,6 +379,10 @@
   color: #1c1c1e;
   border-color: rgba(0, 0, 0, 0.08);
 }
+
+.night .select { background: rgba(107, 163, 255, 0.06); color: #a8c8ff; border-color: rgba(107, 163, 255, 0.08); }
+.day .select { background: rgba(44, 36, 32, 0.05); color: #2c2420; border-color: rgba(44, 36, 32, 0.08); }
+.midday .select { background: rgba(107, 74, 0, 0.05); color: #4a3820; border-color: rgba(107, 74, 0, 0.08); }
 
 .footer {
   display: flex;
@@ -306,6 +423,13 @@
   color: rgba(0, 0, 0, 0.7);
 }
 
+.night .cancelBtn { color: rgba(107, 163, 255, 0.4); }
+.night .cancelBtn:hover { color: rgba(107, 163, 255, 0.7); }
+.day .cancelBtn { color: rgba(44, 36, 32, 0.4); }
+.day .cancelBtn:hover { color: rgba(44, 36, 32, 0.7); }
+.midday .cancelBtn { color: rgba(107, 74, 0, 0.4); }
+.midday .cancelBtn:hover { color: rgba(107, 74, 0, 0.7); }
+
 .saveBtn {
   font-weight: 600;
 }
@@ -327,3 +451,10 @@
 .light .saveBtn:hover {
   background: rgba(26, 51, 32, 0.2);
 }
+
+.night .saveBtn { background: rgba(107, 163, 255, 0.15); color: #6ba3ff; }
+.night .saveBtn:hover { background: rgba(107, 163, 255, 0.25); }
+.day .saveBtn { background: rgba(44, 36, 32, 0.12); color: #2c2420; }
+.day .saveBtn:hover { background: rgba(44, 36, 32, 0.2); }
+.midday .saveBtn { background: rgba(107, 74, 0, 0.12); color: #6b4a00; }
+.midday .saveBtn:hover { background: rgba(107, 74, 0, 0.2); }

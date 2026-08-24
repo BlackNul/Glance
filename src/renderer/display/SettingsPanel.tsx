@@ -4,7 +4,7 @@ import styles from './SettingsPanel.module.css';
 
 interface SettingsPanelProps {
   settings: Settings;
-  theme: 'light' | 'dark';
+  theme: string;
   onClose: () => void;
   onSave: (settings: Settings) => void;
 }
@@ -73,8 +73,41 @@ export function SettingsPanel({ settings, theme, onClose, onSave }: SettingsPane
     setLocationResults([]);
   };
 
+  const handleDetectLocation = () => {
+    if (!navigator.geolocation) return;
+    setIsSearching(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        let name = `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`;
+        try {
+          const reverseRes = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10`
+          );
+          const reverseData = await reverseRes.json();
+          if (reverseData.address) {
+            const city = reverseData.address.city || reverseData.address.town || reverseData.address.village || reverseData.address.suburb || '';
+            const state = reverseData.address.state || '';
+            const country = reverseData.address.country || '';
+            name = [city, state, country].filter(Boolean).join(', ');
+          }
+        } catch {}
+        setLocationQuery(name);
+        setLocal((prev) => ({
+          ...prev,
+          location: { lat: latitude, lon: longitude, name },
+        }));
+        setIsSearching(false);
+      },
+      () => {
+        setIsSearching(false);
+      },
+      { timeout: 10000, enableHighAccuracy: true }
+    );
+  };
+
   const handleSave = () => {
-    onSave(local);
+    onSave({ ...local, locationDetected: true });
     onClose();
   };
 
@@ -119,6 +152,9 @@ export function SettingsPanel({ settings, theme, onClose, onSave }: SettingsPane
                 </div>
               )}
             </div>
+            <button className={styles.detectBtn} onClick={handleDetectLocation} disabled={isSearching}>
+              {isSearching ? 'Detecting...' : '📍 Use my location'}
+            </button>
           </div>
 
           <div className={styles.field}>
@@ -165,6 +201,12 @@ export function SettingsPanel({ settings, theme, onClose, onSave }: SettingsPane
                 onClick={() => update('theme', 'auto')}
               >
                 Auto
+              </button>
+              <button
+                className={`${styles.toggleBtn} ${local.theme === 'dynamic' ? styles.active : ''}`}
+                onClick={() => update('theme', 'dynamic')}
+              >
+                Dynamic
               </button>
               <button
                 className={`${styles.toggleBtn} ${local.theme === 'dark' ? styles.active : ''}`}

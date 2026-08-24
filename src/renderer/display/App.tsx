@@ -8,7 +8,7 @@ const STALE_THRESHOLD_MS = 30 * 60 * 1000;
 export function App() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [settings, setSettings] = useState<Settings | null>(null);
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [theme, setTheme] = useState<string>('dark');
   const [showSettings, setShowSettings] = useState(false);
   const [lastWeatherTime, setLastWeatherTime] = useState<number>(Date.now());
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);

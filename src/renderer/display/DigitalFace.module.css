@@ -271,6 +271,197 @@
   color: #1a3320;
 }
 
+.night {
+  background: linear-gradient(145deg, #0f1628, #0a0e1a);
+  box-shadow:
+    0 0 0 1px rgba(107, 163, 255, 0.08),
+    0 4px 20px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(107, 163, 255, 0.05);
+}
+
+.day {
+  background: linear-gradient(145deg, #f5f0e8, #ebe5d8);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.06),
+    0 4px 20px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.midday {
+  background: linear-gradient(145deg, #f8f2e0, #f0e8c8);
+  box-shadow:
+    0 0 0 1px rgba(107, 74, 0, 0.08),
+    0 4px 20px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.night .screenBezel {
+  background: #080c18;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+.day .screenBezel {
+  background: #c8c0b0;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.midday .screenBezel {
+  background: #d4c8a8;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.night .screen {
+  background: linear-gradient(180deg, #0a1428, #080e20);
+}
+
+.day .screen {
+  background: linear-gradient(180deg, #e8ddd0, #ddd0c0);
+}
+
+.midday .screen {
+  background: linear-gradient(180deg, #f0e8d0, #e8dcc0);
+}
+
+.night .digitGroup {
+  color: #6ba3ff;
+  text-shadow: 0 0 8px rgba(107, 163, 255, 0.4);
+}
+
+.day .digitGroup {
+  color: #2c2420;
+  text-shadow: 0 0 2px rgba(44, 36, 32, 0.15);
+}
+
+.midday .digitGroup {
+  color: #6b4a00;
+  text-shadow: 0 0 8px rgba(107, 74, 0, 0.3);
+}
+
+.night .blinkColon {
+  color: #6ba3ff;
+  text-shadow: 0 0 8px rgba(107, 163, 255, 0.4);
+}
+
+.day .blinkColon {
+  color: #2c2420;
+}
+
+.midday .blinkColon {
+  color: #6b4a00;
+  text-shadow: 0 0 8px rgba(107, 74, 0, 0.3);
+}
+
+.night .period {
+  color: rgba(107, 163, 255, 0.6);
+}
+
+.day .period {
+  color: rgba(44, 36, 32, 0.6);
+}
+
+.midday .period {
+  color: rgba(107, 74, 0, 0.6);
+}
+
+.night .secondsText {
+  color: rgba(107, 163, 255, 0.5);
+}
+
+.day .secondsText {
+  color: rgba(44, 36, 32, 0.5);
+}
+
+.midday .secondsText {
+  color: rgba(107, 74, 0, 0.5);
+}
+
+.night .dateText {
+  color: rgba(107, 163, 255, 0.45);
+}
+
+.day .dateText {
+  color: rgba(44, 36, 32, 0.45);
+}
+
+.midday .dateText {
+  color: rgba(107, 74, 0, 0.45);
+}
+
+.night .weatherPanel {
+  background: rgba(107, 163, 255, 0.06);
+  border: 1px solid rgba(107, 163, 255, 0.1);
+}
+
+.day .weatherPanel {
+  background: rgba(44, 36, 32, 0.06);
+  border: 1px solid rgba(44, 36, 32, 0.08);
+}
+
+.midday .weatherPanel {
+  background: rgba(107, 74, 0, 0.06);
+  border: 1px solid rgba(107, 74, 0, 0.1);
+}
+
+.night .weatherTemp {
+  color: #6ba3ff;
+}
+
+.day .weatherTemp {
+  color: #2c2420;
+}
+
+.midday .weatherTemp {
+  color: #6b4a00;
+}
+
+.night .weatherCondition {
+  color: rgba(107, 163, 255, 0.5);
+}
+
+.day .weatherCondition {
+  color: rgba(44, 36, 32, 0.5);
+}
+
+.midday .weatherCondition {
+  color: rgba(107, 74, 0, 0.5);
+}
+
+.night .weatherHiLo {
+  color: rgba(107, 163, 255, 0.35);
+}
+
+.day .weatherHiLo {
+  color: rgba(44, 36, 32, 0.35);
+}
+
+.midday .weatherHiLo {
+  color: rgba(107, 74, 0, 0.35);
+}
+
+.night .settingsBtn {
+  color: #6ba3ff;
+}
+
+.day .settingsBtn {
+  color: #2c2420;
+}
+
+.midday .settingsBtn {
+  color: #6b4a00;
+}
+
+.night .staleIndicator {
+  color: #ff8a50;
+}
+
+.day .staleIndicator {
+  color: #cc4400;
+}
+
+.midday .staleIndicator {
+  color: #cc4400;
+}
+
 .staleIndicator {
   position: absolute;
   bottom: 4px;

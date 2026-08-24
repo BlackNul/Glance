@@ -5,7 +5,7 @@ import styles from './DigitalFace.module.css';
 interface DigitalFaceProps {
   settings: Settings;
   weather: WeatherData | null;
-  theme: 'light' | 'dark';
+  theme: string;
   isStale: boolean;
   onOpenSettings: () => void;
 }

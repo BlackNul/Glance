@@ -32,9 +32,11 @@ const api = {
     ipcRenderer.on(IPC_CHANNELS.WINDOW_COLLAPSE, () => callback());
   },
   setChipPosition: (x, y) => ipcRenderer.invoke(IPC_CHANNELS.CHIP_POSITION_CHANGED, x, y),
+  getChipPosition: () => ipcRenderer.invoke('chip:get-position'),
   setDisplayPosition: (x, y) => ipcRenderer.invoke(IPC_CHANNELS.DISPLAY_POSITION_CHANGED, x, y),
   getDisplayPosition: () => ipcRenderer.invoke('display:get-position'),
   showContextMenu: () => ipcRenderer.invoke(IPC_CHANNELS.DISPLAY_CONTEXT_MENU),
+  resizeDisplay: (w, h) => ipcRenderer.invoke('display:resize', w, h),
   onThemeChanged: (callback) => {
     ipcRenderer.on('theme:changed', (_, theme) => callback(theme));
   },

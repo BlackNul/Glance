@@ -5,13 +5,14 @@ import styles from './Chip.module.css';
 interface ChipProps {
   weather: WeatherData | null;
   settings: Settings;
-  theme: 'light' | 'dark';
+  theme: string;
 }
 
 export function Chip({ weather, settings, theme }: ChipProps) {
   const [time, setTime] = useState(new Date());
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStart = useRef({ x: 0, y: 0 });
+  const isDraggingRef = useRef(false);
+  const dragStartScreen = useRef({ x: 0, y: 0 });
+  const mouseOffsetInWindow = useRef({ x: 0, y: 0 });
   const didDrag = useRef(false);
 
   useEffect(() => {
@@ -23,60 +24,64 @@ export function Chip({ weather, settings, theme }: ChipProps) {
     return date.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
-      hour12: false,
+      hour12: settings.timeFormat === '12',
     });
   };
 
   const formatTemp = (temp: number): string => {
     if (settings.units === 'F') {
-      return `${Math.round(temp * 9 / 5 + 32)}°`;
+      return `${Math.round((temp * 9) / 5 + 32)}°`;
     }
     return `${temp}°`;
   };
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    setIsDragging(true);
+    if (e.button !== 0) return;
+    dragStartScreen.current = { x: e.screenX, y: e.screenY };
+    mouseOffsetInWindow.current = {
+      x: e.screenX - (window.screenX ?? 0),
+      y: e.screenY - (window.screenY ?? 0),
+    };
     didDrag.current = false;
-    dragStart.current = { x: e.screenX, y: e.screenY };
+    isDraggingRef.current = true;
     e.preventDefault();
   }, []);
 
-  const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
-      const dx = e.screenX - dragStart.current.x;
-      const dy = e.screenY - dragStart.current.y;
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDraggingRef.current) return;
+      const dx = e.screenX - dragStartScreen.current.x;
+      const dy = e.screenY - dragStartScreen.current.y;
       if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
         didDrag.current = true;
       }
-      if (!isDragging) return;
-      dragStart.current = { x: e.screenX, y: e.screenY };
-      window.api.setChipPosition(
-        settings.chipPosition.x + dx,
-        settings.chipPosition.y + dy
-      );
-    },
-    [isDragging, settings.chipPosition]
-  );
+      if (!didDrag.current) return;
+      const newX = e.screenX - mouseOffsetInWindow.current.x;
+      const newY = e.screenY - mouseOffsetInWindow.current.y;
+      window.api.setChipPosition(Math.round(newX), Math.round(newY));
+    };
 
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
+    const handleMouseUp = () => {
+      if (isDraggingRef.current) {
+        isDraggingRef.current = false;
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
   }, []);
 
-  useEffect(() => {
-    if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-      return () => {
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
-      };
+  const handleClick = (e: React.MouseEvent) => {
+    if (didDrag.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
     }
-  }, [isDragging, handleMouseMove, handleMouseUp]);
-
-  const handleClick = () => {
-    if (!didDrag.current) {
-      window.api.toggleDisplay();
-    }
+    window.api.toggleDisplay();
   };
 
   return (

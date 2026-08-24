@@ -4,6 +4,9 @@ export interface WeatherData {
   icon: string;
   high: number;
   low: number;
+  sunrise: string;
+  sunset: string;
+  isDay: boolean;
 }
 
 export interface Settings {
@@ -12,9 +15,10 @@ export interface Settings {
     lon: number;
     name: string;
   };
+  locationDetected: boolean;
   units: 'C' | 'F';
   timeFormat: '12' | '24';
-  theme: 'light' | 'dark' | 'auto';
+  theme: 'light' | 'dark' | 'auto' | 'dynamic';
   secondHandStyle: 'sweep' | 'tick';
   launchAtStartup: boolean;
   refreshInterval: number;
@@ -27,6 +31,7 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = {
   location: { lat: 40.7128, lon: -74.006, name: 'New York' },
+  locationDetected: false,
   units: 'C',
   timeFormat: '24',
   theme: 'auto',

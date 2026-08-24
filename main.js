@@ -43,6 +43,14 @@ function saveSettings(settings) {
   }
 }
 
+let saveSettingsTimeout = null;
+function debouncedSaveSettings(s) {
+  if (saveSettingsTimeout) clearTimeout(saveSettingsTimeout);
+  saveSettingsTimeout = setTimeout(() => {
+    saveSettings(s);
+  }, 500);
+}
+
 let settings = loadSettings();
 let chipWindow = null;
 let displayWindow = null;
@@ -201,13 +209,29 @@ function getSystemTheme() {
   return nativeTheme.shouldUseDarkColors ? 'dark' : 'light';
 }
 
-function getEffectiveTheme() {
+function getTimeOfDay(sunrise, sunset) {
+  const now = Date.now();
+  const rise = new Date(sunrise).getTime();
+  const set = new Date(sunset).getTime();
+
+  if (now < rise || now > set) return 'night';
+
+  const hour = new Date().getHours();
+  if (hour >= 11 && hour < 15) return 'midday';
+
+  return 'day';
+}
+
+function getEffectiveTheme(weather) {
   if (settings.theme === 'auto') return getSystemTheme();
+  if (settings.theme === 'dynamic' && weather && weather.sunrise && weather.sunset) {
+    return getTimeOfDay(weather.sunrise, weather.sunset);
+  }
   return settings.theme;
 }
 
-function broadcastTheme() {
-  const theme = getEffectiveTheme();
+function broadcastTheme(weather) {
+  const theme = getEffectiveTheme(weather || cachedWeather);
   BrowserWindow.getAllWindows().forEach((win) => {
     if (!win.isDestroyed()) {
       win.webContents.send('theme:changed', theme);
@@ -244,7 +268,7 @@ function weatherCodeToCondition(code) {
 
 async function fetchWeather() {
   try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${settings.location.lat}&longitude=${settings.location.lon}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto`;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${settings.location.lat}&longitude=${settings.location.lon}&current=temperature_2m,weather_code,is_day&daily=temperature_2m_max,temperature_2m_min,weather_code,sunrise,sunset&timezone=auto`;
     const response = await fetch(url);
     if (!response.ok) return null;
 
@@ -257,6 +281,9 @@ async function fetchWeather() {
       icon,
       high: Math.round(data.daily.temperature_2m_max[0]),
       low: Math.round(data.daily.temperature_2m_min[0]),
+      sunrise: data.daily.sunrise[0],
+      sunset: data.daily.sunset[0],
+      isDay: data.current.is_day === 1,
     };
     return cachedWeather;
   } catch (error) {
@@ -269,12 +296,18 @@ function startWeatherPolling() {
   stopWeatherPolling();
 
   fetchWeather().then((weather) => {
-    if (weather) broadcastWeather(weather);
+    if (weather) {
+      broadcastWeather(weather);
+      broadcastTheme(weather);
+    }
   });
 
   refreshTimer = setInterval(async () => {
     const weather = await fetchWeather();
-    if (weather) broadcastWeather(weather);
+    if (weather) {
+      broadcastWeather(weather);
+      broadcastTheme(weather);
+    }
   }, settings.refreshInterval * 60 * 1000);
 }
 
@@ -336,18 +369,29 @@ function createTray() {
 app.whenReady().then(() => {
   createChipWindow();
   createTray();
+
+  if (chipWindow && !chipWindow.isDestroyed()) {
+    chipWindow.webContents.session.setPermissionRequestHandler((_, permission, callback) => {
+      if (permission === 'geolocation') {
+        callback(true);
+      } else {
+        callback(false);
+      }
+    });
+  }
   startWeatherPolling();
-  broadcastTheme();
+  broadcastTheme(cachedWeather);
 
   nativeTheme.on('updated', () => {
     if (settings.theme === 'auto') {
-      broadcastTheme();
+      broadcastTheme(cachedWeather);
     }
   });
 
   powerMonitor.on('resume', () => {
     startWeatherPolling();
     broadcastWeather(cachedWeather);
+    broadcastTheme(cachedWeather);
   });
 
   powerMonitor.on('suspend', () => {
@@ -369,7 +413,7 @@ app.whenReady().then(() => {
     startWeatherPolling();
     setAutoLaunch(settings.launchAtStartup);
     broadcastToAll('settings:changed', settings);
-    broadcastTheme();
+    broadcastTheme(cachedWeather);
   });
 
   ipcMain.handle('window:expand', () => {
@@ -379,16 +423,23 @@ app.whenReady().then(() => {
   ipcMain.handle('chip:position-changed', (_, x, y) => {
     const pos = clampToWorkArea(x, y, CHIP_WIDTH, CHIP_HEIGHT);
     settings.chipPosition = pos;
-    saveSettings(settings);
+    debouncedSaveSettings(settings);
     if (chipWindow && !chipWindow.isDestroyed()) {
-      chipWindow.setPosition(pos.x, pos.y);
+      chipWindow.setBounds({ x: pos.x, y: pos.y, width: CHIP_WIDTH, height: CHIP_HEIGHT });
     }
+  });
+
+  ipcMain.handle('chip:get-position', () => {
+    if (chipWindow && !chipWindow.isDestroyed()) {
+      return chipWindow.getPosition();
+    }
+    return [settings.chipPosition.x, settings.chipPosition.y];
   });
 
   ipcMain.handle('display:position-changed', (event, x, y) => {
     const win = BrowserWindow.fromWebContents(event.sender);
     if (win && !win.isDestroyed()) {
-      win.setPosition(x, y);
+      win.setBounds({ x, y, width: DISPLAY_SIZE, height: DISPLAY_SIZE });
     }
   });
 

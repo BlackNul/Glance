@@ -2,7 +2,7 @@ import { app, ipcMain, BrowserWindow, nativeTheme, screen, powerMonitor } from '
 import { createChipWindow, createDisplayWindow, toggleDisplayWindow, getChipWindow, destroyDisplayWindow } from './windowManager';
 import { createTray, destroyTray } from './tray';
 import { loadSettings, saveSettings } from './settingsStore';
-import { startWeatherPolling, stopWeatherPolling, fetchWeather } from './weatherService';
+import { startWeatherPolling, stopWeatherPolling, fetchWeather, getCachedWeather } from './weatherService';
 import { setAutoLaunch } from './autoLaunch';
 import { IPC_CHANNELS } from '../shared/ipc-channels';
 import { Settings, WeatherData } from '../shared/types';
@@ -33,13 +33,29 @@ function getSystemTheme(): 'light' | 'dark' {
   return nativeTheme.shouldUseDarkColors ? 'dark' : 'light';
 }
 
-function getEffectiveTheme(): 'light' | 'dark' {
+function getTimeOfDay(sunrise: string, sunset: string): 'day' | 'midday' | 'night' {
+  const now = Date.now();
+  const rise = new Date(sunrise).getTime();
+  const set = new Date(sunset).getTime();
+
+  if (now < rise || now > set) return 'night';
+
+  const hour = new Date().getHours();
+  if (hour >= 11 && hour < 15) return 'midday';
+
+  return 'day';
+}
+
+function getEffectiveTheme(weather?: WeatherData | null): string {
   if (settings.theme === 'auto') return getSystemTheme();
+  if (settings.theme === 'dynamic' && weather?.sunrise && weather?.sunset) {
+    return getTimeOfDay(weather.sunrise, weather.sunset);
+  }
   return settings.theme;
 }
 
-function broadcastTheme(): void {
-  const theme = getEffectiveTheme();
+function broadcastTheme(weather?: WeatherData | null): void {
+  const theme = getEffectiveTheme(weather);
   BrowserWindow.getAllWindows().forEach((win) => {
     if (!win.isDestroyed()) {
       win.webContents.send('theme:changed', theme);
@@ -70,6 +86,14 @@ function clampToWorkArea(x: number, y: number, width: number, height: number): {
 app.whenReady().then(() => {
   const chipWindow = createChipWindow(settings);
 
+  chipWindow.webContents.session.setPermissionRequestHandler((_, permission, callback) => {
+    if (permission === 'geolocation') {
+      callback(true);
+    } else {
+      callback(false);
+    }
+  });
+
   createTray(
     () => {
       chipWindow.show();
@@ -92,15 +116,16 @@ app.whenReady().then(() => {
     settings.refreshInterval,
     (weather) => {
       broadcastWeather(weather);
+      broadcastTheme(weather);
     }
   );
 
   setAutoLaunch(settings.launchAtStartup);
-  broadcastTheme();
+  broadcastTheme(getCachedWeather());
 
   nativeTheme.on('updated', () => {
     if (settings.theme === 'auto') {
-      broadcastTheme();
+      broadcastTheme(getCachedWeather());
     }
   });
 
@@ -111,6 +136,7 @@ app.whenReady().then(() => {
       settings.refreshInterval,
       (weather) => {
         broadcastWeather(weather);
+        broadcastTheme(weather);
       }
     );
   });
@@ -137,21 +163,55 @@ app.whenReady().then(() => {
       settings.refreshInterval,
       (weather) => {
         broadcastWeather(weather);
+        broadcastTheme(weather);
       }
     );
     setAutoLaunch(settings.launchAtStartup);
     broadcastSettings();
-    broadcastTheme();
+    broadcastTheme(getCachedWeather());
   });
 
   ipcMain.handle(IPC_CHANNELS.WINDOW_EXPAND, () => {
     toggleDisplayWindow(settings);
   });
 
+  let saveSettingsTimeout: NodeJS.Timeout | null = null;
+  const debouncedSaveSettings = (s: Settings) => {
+    if (saveSettingsTimeout) clearTimeout(saveSettingsTimeout);
+    saveSettingsTimeout = setTimeout(() => {
+      saveSettings(s);
+    }, 500);
+  };
+
   ipcMain.handle(IPC_CHANNELS.CHIP_POSITION_CHANGED, (_, x: number, y: number) => {
     const pos = clampToWorkArea(x, y, 180, 44);
     settings.chipPosition = pos;
-    saveSettings(settings);
+    debouncedSaveSettings(settings);
+    if (chipWindow && !chipWindow.isDestroyed()) {
+      chipWindow.setBounds({ x: pos.x, y: pos.y, width: 180, height: 44 });
+    }
+  });
+
+  ipcMain.handle('chip:get-position', () => {
+    if (chipWindow && !chipWindow.isDestroyed()) {
+      return chipWindow.getPosition();
+    }
+    return [settings.chipPosition.x, settings.chipPosition.y];
+  });
+
+  ipcMain.handle('display:position-changed', (event, x: number, y: number) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (win && !win.isDestroyed()) {
+      win.setBounds({ x, y, width: 260, height: 260 });
+    }
+  });
+
+  ipcMain.handle('display:get-position', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (win && !win.isDestroyed()) {
+      return win.getPosition();
+    }
+    return [300, 100];
   });
 
   chipWindow.on('closed', () => {

@@ -22,6 +22,7 @@ const api = {
   },
   setChipPosition: (x: number, y: number): Promise<void> =>
     ipcRenderer.invoke(IPC_CHANNELS.CHIP_POSITION_CHANGED, x, y),
+  getChipPosition: (): Promise<[number, number]> => ipcRenderer.invoke('chip:get-position'),
   setDisplayPosition: (x: number, y: number): Promise<void> =>
     ipcRenderer.invoke('display:position-changed', x, y),
   getDisplayPosition: (): Promise<[number, number]> => ipcRenderer.invoke('display:get-position'),

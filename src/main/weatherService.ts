@@ -7,11 +7,14 @@ interface OpenMeteoResponse {
   current: {
     temperature_2m: number;
     weather_code: number;
+    is_day: number;
   };
   daily: {
     temperature_2m_max: number[];
     temperature_2m_min: number[];
     weather_code: number[];
+    sunrise: string[];
+    sunset: string[];
   };
 }
 
@@ -44,7 +47,7 @@ function weatherCodeToCondition(code: number): { condition: string; icon: string
 
 export async function fetchWeather(lat: number, lon: number): Promise<WeatherData | null> {
   try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto`;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code,is_day&daily=temperature_2m_max,temperature_2m_min,weather_code,sunrise,sunset&timezone=auto`;
     const response = await fetch(url);
     if (!response.ok) return null;
 
@@ -57,6 +60,9 @@ export async function fetchWeather(lat: number, lon: number): Promise<WeatherDat
       icon,
       high: Math.round(data.daily.temperature_2m_max[0]),
       low: Math.round(data.daily.temperature_2m_min[0]),
+      sunrise: data.daily.sunrise[0],
+      sunset: data.daily.sunset[0],
+      isDay: data.current.is_day === 1,
     };
     return cachedWeather;
   } catch (error) {
