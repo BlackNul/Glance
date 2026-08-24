@@ -6,6 +6,7 @@ const SETTINGS_FILE = 'settings.json';
 
 const DEFAULT_SETTINGS = {
   location: { lat: 40.7128, lon: -74.006, name: 'New York' },
+  locationDetected: false,
   units: 'C',
   timeFormat: '24',
   theme: 'auto',
@@ -63,6 +64,10 @@ function createChipWindow() {
   chipWindow = new BrowserWindow({
     width: CHIP_WIDTH,
     height: CHIP_HEIGHT,
+    minWidth: CHIP_WIDTH,
+    minHeight: CHIP_HEIGHT,
+    maxWidth: CHIP_WIDTH,
+    maxHeight: CHIP_HEIGHT,
     x: pos.x,
     y: pos.y,
     frame: false,
@@ -80,6 +85,8 @@ function createChipWindow() {
 
   chipWindow.loadFile(path.join(__dirname, 'dist/src/renderer/chip/index.html'));
   chipWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  chipWindow.setMinimumSize(CHIP_WIDTH, CHIP_HEIGHT);
+  chipWindow.setMaximumSize(CHIP_WIDTH, CHIP_HEIGHT);
 
   return chipWindow;
 }
@@ -108,6 +115,10 @@ function createDisplayWindow() {
   displayWindow = new BrowserWindow({
     width: displayWidth,
     height: displayHeight,
+    minWidth: displayWidth,
+    minHeight: displayHeight,
+    maxWidth: displayWidth,
+    maxHeight: displayHeight,
     x: Math.round(displayX),
     y: Math.round(displayY),
     frame: false,
@@ -374,21 +385,24 @@ app.whenReady().then(() => {
     }
   });
 
-  ipcMain.handle('display:position-changed', (_, x, y) => {
-    if (chipWindow && !chipWindow.isDestroyed()) {
-      chipWindow.setPosition(x, y);
+  ipcMain.handle('display:position-changed', (event, x, y) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (win && !win.isDestroyed()) {
+      win.setPosition(x, y);
     }
   });
 
-  ipcMain.handle('display:get-position', () => {
-    if (chipWindow && !chipWindow.isDestroyed()) {
-      return chipWindow.getPosition();
+  ipcMain.handle('display:get-position', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (win && !win.isDestroyed()) {
+      return win.getPosition();
     }
     return [300, 100];
   });
 
-  ipcMain.handle('display:context-menu', () => {
-    if (!chipWindow || chipWindow.isDestroyed()) return;
+  ipcMain.handle('display:context-menu', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (!win || win.isDestroyed()) return;
 
     const contextMenu = Menu.buildFromTemplate([
       {
@@ -426,7 +440,21 @@ app.whenReady().then(() => {
       },
     ]);
 
-    contextMenu.popup({ window: chipWindow });
+    contextMenu.popup({ window: win });
+  });
+
+  ipcMain.handle('display:resize', (_, w, h) => {
+    if (displayWindow && !displayWindow.isDestroyed()) {
+      const clampedW = Math.min(Math.max(w, DISPLAY_SIZE), DISPLAY_SIZE);
+      const clampedH = Math.min(Math.max(h, DISPLAY_SIZE), DISPLAY_SIZE);
+      const bounds = displayWindow.getBounds();
+      displayWindow.setBounds({
+        x: bounds.x,
+        y: bounds.y,
+        width: clampedW,
+        height: clampedH,
+      });
+    }
   });
 
   chipWindow.on('closed', () => {

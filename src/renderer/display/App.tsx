@@ -11,6 +11,7 @@ export function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [showSettings, setShowSettings] = useState(false);
   const [lastWeatherTime, setLastWeatherTime] = useState<number>(Date.now());
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
     window.api.getSettings().then(setSettings);
@@ -27,6 +28,12 @@ export function App() {
       setSettings(newSettings);
     });
     window.api.onThemeChanged(setTheme);
+
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
   }, []);
 
   const isStale = weather !== null && Date.now() - lastWeatherTime > STALE_THRESHOLD_MS;
@@ -35,22 +42,37 @@ export function App() {
     window.api.setSettings(newSettings);
   }, []);
 
+  const handleOpenSettings = useCallback(() => {
+    setShowSettings(true);
+  }, []);
+
+  const handleCloseSettings = useCallback(() => {
+    setShowSettings(false);
+  }, []);
+
   if (!settings) return null;
+
+  const effectiveSecondHandStyle = prefersReducedMotion ? 'tick' : settings.secondHandStyle;
+
+  const settingsWithReducedMotion = {
+    ...settings,
+    secondHandStyle: effectiveSecondHandStyle as 'sweep' | 'tick',
+  };
 
   return (
     <div className={`display-container ${theme}`}>
       <DigitalFace
-        settings={settings}
+        settings={settingsWithReducedMotion}
         weather={weather}
         theme={theme}
         isStale={isStale}
-        onOpenSettings={() => setShowSettings(true)}
+        onOpenSettings={handleOpenSettings}
       />
       {showSettings && (
         <SettingsPanel
           settings={settings}
           theme={theme}
-          onClose={() => setShowSettings(false)}
+          onClose={handleCloseSettings}
           onSave={handleSaveSettings}
         />
       )}

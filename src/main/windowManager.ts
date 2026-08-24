@@ -19,6 +19,10 @@ export function createChipWindow(settings: Settings): BrowserWindow {
   chipWindow = new BrowserWindow({
     width: CHIP_WIDTH,
     height: CHIP_HEIGHT,
+    minWidth: CHIP_WIDTH,
+    minHeight: CHIP_HEIGHT,
+    maxWidth: CHIP_WIDTH,
+    maxHeight: CHIP_HEIGHT,
     x,
     y,
     frame: false,
@@ -64,6 +68,10 @@ export function createDisplayWindow(settings: Settings): BrowserWindow {
   displayWindow = new BrowserWindow({
     width: displayWidth,
     height: displayHeight,
+    minWidth: displayWidth,
+    minHeight: displayHeight,
+    maxWidth: displayWidth,
+    maxHeight: displayHeight,
     x: Math.round(displayX),
     y: Math.round(displayY),
     frame: false,
