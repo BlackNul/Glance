@@ -138,7 +138,7 @@ export function AnalogFace({ settings, weather, theme }: AnalogFaceProps) {
         {weather && (
           <g className={styles.weatherComplication}>
             <text x="130" y="200" textAnchor="middle" className={styles.weatherIcon}>
-              {getWeatherEmoji(weather.icon)}
+              {getWeatherEmoji(weather.icon, weather.isDay)}
             </text>
             <text x="130" y="218" textAnchor="middle" className={styles.weatherTemp}>
               {formatTemp(weather.tempC)}
@@ -156,8 +156,8 @@ export function AnalogFace({ settings, weather, theme }: AnalogFaceProps) {
   );
 }
 
-function getWeatherEmoji(icon: string): string {
-  const iconMap: Record<string, string> = {
+function getWeatherEmoji(icon: string, isDay: boolean): string {
+  const dayIcons: Record<string, string> = {
     clear: '☀️',
     'partly-cloudy': '⛅',
     cloudy: '☁️',
@@ -167,5 +167,16 @@ function getWeatherEmoji(icon: string): string {
     thunderstorm: '⛈️',
     fog: '🌫️',
   };
-  return iconMap[icon] || '☀️';
+  const nightIcons: Record<string, string> = {
+    clear: '🌙',
+    'partly-cloudy': '🌙',
+    cloudy: '☁️',
+    rain: '🌧️',
+    drizzle: '🌧️',
+    snow: '🌨️',
+    thunderstorm: '⛈️',
+    fog: '🌫️',
+  };
+  const icons = isDay ? dayIcons : nightIcons;
+  return icons[icon] || (isDay ? '☀️' : '🌙');
 }

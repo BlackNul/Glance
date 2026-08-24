@@ -91,7 +91,7 @@ export function Chip({ weather, settings, theme }: ChipProps) {
       onClick={handleClick}
     >
       <div className={styles.weatherSection}>
-        <WeatherIcon icon={weather?.icon || 'clear'} />
+        <WeatherIcon icon={weather?.icon || 'clear'} isDay={weather?.isDay ?? true} />
         <span className={styles.temp}>
           {weather ? formatTemp(weather.tempC) : '--°'}
         </span>
@@ -104,8 +104,8 @@ export function Chip({ weather, settings, theme }: ChipProps) {
   );
 }
 
-function WeatherIcon({ icon }: { icon: string }) {
-  const iconMap: Record<string, string> = {
+function WeatherIcon({ icon, isDay }: { icon: string; isDay: boolean }) {
+  const dayIcons: Record<string, string> = {
     clear: '☀️',
     'partly-cloudy': '⛅',
     cloudy: '☁️',
@@ -115,5 +115,16 @@ function WeatherIcon({ icon }: { icon: string }) {
     thunderstorm: '⛈️',
     fog: '🌫️',
   };
-  return <span className={styles.icon}>{iconMap[icon] || '☀️'}</span>;
+  const nightIcons: Record<string, string> = {
+    clear: '🌙',
+    'partly-cloudy': '🌙',
+    cloudy: '☁️',
+    rain: '🌧️',
+    drizzle: '🌧️',
+    snow: '🌨️',
+    thunderstorm: '⛈️',
+    fog: '🌫️',
+  };
+  const icons = isDay ? dayIcons : nightIcons;
+  return <span className={styles.icon}>{icons[icon] || (isDay ? '☀️' : '🌙')}</span>;
 }

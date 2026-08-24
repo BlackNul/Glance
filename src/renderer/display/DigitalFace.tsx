@@ -112,7 +112,7 @@ export function DigitalFace({ settings, weather, theme, isStale, onOpenSettings 
       {weather && (
         <div className={styles.weatherPanel}>
           <div className={styles.weatherIconTemp}>
-            <span className={styles.weatherEmoji}>{getWeatherEmoji(weather.icon)}</span>
+            <span className={styles.weatherEmoji}>{getWeatherEmoji(weather.icon, weather.isDay)}</span>
             <span className={styles.weatherTemp}>{formatTemp(weather.tempC)}</span>
           </div>
           <div className={styles.weatherCondition}>{weather.condition}</div>
@@ -137,8 +137,8 @@ export function DigitalFace({ settings, weather, theme, isStale, onOpenSettings 
   );
 }
 
-function getWeatherEmoji(icon: string): string {
-  const iconMap: Record<string, string> = {
+function getWeatherEmoji(icon: string, isDay: boolean): string {
+  const dayIcons: Record<string, string> = {
     clear: '☀️',
     'partly-cloudy': '⛅',
     cloudy: '☁️',
@@ -148,5 +148,16 @@ function getWeatherEmoji(icon: string): string {
     thunderstorm: '⛈️',
     fog: '🌫️',
   };
-  return iconMap[icon] || '☀️';
+  const nightIcons: Record<string, string> = {
+    clear: '🌙',
+    'partly-cloudy': '🌙',
+    cloudy: '☁️',
+    rain: '🌧️',
+    drizzle: '🌧️',
+    snow: '🌨️',
+    thunderstorm: '⛈️',
+    fog: '🌫️',
+  };
+  const icons = isDay ? dayIcons : nightIcons;
+  return icons[icon] || (isDay ? '☀️' : '🌙');
 }
