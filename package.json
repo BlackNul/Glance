@@ -4,7 +4,7 @@
   "description": "Chip Weather Clock Widget for Windows Desktop",
   "main": "dist-electron/main/main.js",
   "scripts": {
-    "dev": "vite build && electron .",
+    "dev": "npm run build:main && vite build && electron .",
     "build": "tsc && vite build",
     "build:main": "tsc -p tsconfig.main.json",
     "build:all": "npm run build:main && npm run build",
