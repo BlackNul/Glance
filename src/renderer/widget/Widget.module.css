@@ -5,11 +5,12 @@
   align-items: center;
   font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
   user-select: none;
+  padding-top: 0;
 }
 
 .chip {
-  width: 260px;
-  height: 44px;
+  width: 180px;
+  height: 40px;
   display: flex;
   align-items: center;
   gap: 8px;

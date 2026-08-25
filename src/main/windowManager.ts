@@ -4,15 +4,16 @@ import { Settings } from '../shared/types';
 
 let widgetWindow: BrowserWindow | null = null;
 
-const CHIP_WIDTH = 260;
-const CHIP_HEIGHT = 44;
-const DISPLAY_SIZE = 260;
+const CHIP_WIDTH = 180;
+const CHIP_HEIGHT = 40;
+const DISPLAY_WIDTH = 260;
+const DISPLAY_HEIGHT = 260;
 const GAP = 6;
 
 export const COLLAPSED_WIDTH = CHIP_WIDTH;
 export const COLLAPSED_HEIGHT = CHIP_HEIGHT;
-export const EXPANDED_WIDTH = CHIP_WIDTH;
-export const EXPANDED_HEIGHT = CHIP_HEIGHT + GAP + DISPLAY_SIZE;
+export const EXPANDED_WIDTH = DISPLAY_WIDTH;
+export const EXPANDED_HEIGHT = CHIP_HEIGHT + GAP + DISPLAY_HEIGHT;
 
 function getPreloadPath(): string {
   return path.join(__dirname, 'preload.js');
@@ -54,9 +55,9 @@ export function expandWidgetWindow(): void {
     const bounds = widgetWindow.getBounds();
     widgetWindow.setResizable(true);
     widgetWindow.setBounds({
-      x: bounds.x,
+      x: bounds.x + Math.round((bounds.width - DISPLAY_WIDTH) / 2),
       y: bounds.y,
-      width: CHIP_WIDTH,
+      width: DISPLAY_WIDTH,
       height: EXPANDED_HEIGHT,
     });
     widgetWindow.setResizable(false);
@@ -68,7 +69,7 @@ export function collapseWidgetWindow(): void {
     const bounds = widgetWindow.getBounds();
     widgetWindow.setResizable(true);
     widgetWindow.setBounds({
-      x: bounds.x,
+      x: bounds.x + Math.round((DISPLAY_WIDTH - CHIP_WIDTH) / 2),
       y: bounds.y,
       width: CHIP_WIDTH,
       height: CHIP_HEIGHT,

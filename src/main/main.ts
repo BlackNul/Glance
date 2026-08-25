@@ -9,6 +9,7 @@ import {
   destroyWidgetWindow,
   COLLAPSED_WIDTH,
   COLLAPSED_HEIGHT,
+  EXPANDED_WIDTH,
 } from './windowManager';
 import { createTray, destroyTray } from './tray';
 import { loadSettings, saveSettings } from './settingsStore';
@@ -228,10 +229,12 @@ app.whenReady().then(() => {
     if (widgetWin && !widgetWin.isDestroyed()) {
       const bounds = widgetWin.getBounds();
       const height = bounds.height;
-      const pos = clampToWorkArea(x, y, COLLAPSED_WIDTH, height);
+      const isExpanded = height > COLLAPSED_HEIGHT;
+      const width = isExpanded ? EXPANDED_WIDTH : COLLAPSED_WIDTH;
+      const pos = clampToWorkArea(x, y, width, height);
       settings.chipPosition = pos;
       debouncedSaveSettings(settings);
-      widgetWin.setBounds({ x: pos.x, y: pos.y, width: COLLAPSED_WIDTH, height });
+      widgetWin.setBounds({ x: pos.x, y: pos.y, width, height });
     }
   });
 
