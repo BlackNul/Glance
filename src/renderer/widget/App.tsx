@@ -67,6 +67,7 @@ export function App() {
   const dragStartScreen = useRef({ x: 0, y: 0 });
   const windowPos = useRef({ x: 0, y: 0 });
   const didDrag = useRef(false);
+  const mouseDownTarget = useRef<'chip' | 'other' | null>(null);
 
   useEffect(() => {
     window.api.getSettings().then((s) => {
@@ -112,7 +113,6 @@ export function App() {
     dragStartScreen.current = { x: e.screenX, y: e.screenY };
     didDrag.current = false;
     isDraggingRef.current = true;
-    e.preventDefault();
   }, []);
 
   useEffect(() => {
@@ -132,7 +132,11 @@ export function App() {
 
     const handleMouseUp = () => {
       if (isDraggingRef.current) {
+        if (!didDrag.current && mouseDownTarget.current === 'chip') {
+          window.api.toggleExpand();
+        }
         isDraggingRef.current = false;
+        mouseDownTarget.current = null;
       }
     };
 
@@ -144,9 +148,12 @@ export function App() {
     };
   }, []);
 
-  const handleChipClick = useCallback(() => {
-    if (didDrag.current) return;
-    window.api.toggleExpand();
+  const handleChipMouseDown = useCallback(() => {
+    mouseDownTarget.current = 'chip';
+  }, []);
+
+  const handleDisplayMouseDown = useCallback(() => {
+    mouseDownTarget.current = 'other';
   }, []);
 
   const handleSettingsClick = useCallback((e: React.MouseEvent) => {
@@ -169,7 +176,7 @@ export function App() {
       style={{ cursor: isDraggingRef.current ? 'grabbing' : 'grab' }}
     >
       {/* Chip bar */}
-      <div className={styles.chip} onClick={handleChipClick}>
+      <div className={styles.chip} onMouseDown={handleChipMouseDown}>
         <div className={styles.weatherSection}>
           <span className={styles.icon}>
             {getWeatherEmoji(weather?.icon || 'clear', weather?.isDay ?? true)}
@@ -186,7 +193,7 @@ export function App() {
 
       {/* Display panel - conditionally shown */}
       {expanded && (
-        <div className={styles.displayPanel}>
+        <div className={styles.displayPanel} onMouseDown={handleDisplayMouseDown}>
           <div className={styles.screenBezel}>
             <div className={styles.screen}>
               <div className={styles.timeRow}>
