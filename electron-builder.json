@@ -6,7 +6,10 @@
   },
   "files": [
     "dist/**/*",
-    "dist-electron/**/*"
+    "dist-electron/**/*",
+    "main.js",
+    "preload.js",
+    "assets/**/*"
   ],
   "win": {
     "target": [

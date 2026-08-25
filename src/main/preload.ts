@@ -13,20 +13,13 @@ const api = {
   onSettingsChanged: (callback: (settings: Settings) => void) => {
     ipcRenderer.on(IPC_CHANNELS.SETTINGS_CHANGED, (_, settings) => callback(settings));
   },
-  toggleDisplay: (): Promise<void> => ipcRenderer.invoke(IPC_CHANNELS.WINDOW_EXPAND),
-  onExpand: (callback: () => void) => {
-    ipcRenderer.on(IPC_CHANNELS.WINDOW_EXPAND, () => callback());
-  },
-  onCollapse: (callback: () => void) => {
-    ipcRenderer.on(IPC_CHANNELS.WINDOW_COLLAPSE, () => callback());
-  },
+  toggleExpand: (): Promise<void> => ipcRenderer.invoke(IPC_CHANNELS.WINDOW_EXPAND),
+  expand: (): Promise<void> => ipcRenderer.invoke('widget:expand'),
+  collapse: (): Promise<void> => ipcRenderer.invoke('widget:collapse'),
+  isExpanded: (): Promise<boolean> => ipcRenderer.invoke('widget:is-expanded'),
   setChipPosition: (x: number, y: number): Promise<void> =>
     ipcRenderer.invoke(IPC_CHANNELS.CHIP_POSITION_CHANGED, x, y),
   getChipPosition: (): Promise<[number, number]> => ipcRenderer.invoke('chip:get-position'),
-  setDisplayPosition: (x: number, y: number): Promise<void> =>
-    ipcRenderer.invoke('display:position-changed', x, y),
-  getDisplayPosition: (): Promise<[number, number]> => ipcRenderer.invoke('display:get-position'),
-  showContextMenu: (): Promise<void> => ipcRenderer.invoke('display:context-menu'),
   onThemeChanged: (callback: (theme: 'light' | 'dark') => void) => {
     ipcRenderer.on('theme:changed', (_, theme) => callback(theme));
   },

@@ -10,8 +10,7 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        chip: path.resolve(__dirname, 'src/renderer/chip/index.html'),
-        display: path.resolve(__dirname, 'src/renderer/display/index.html'),
+        widget: path.resolve(__dirname, 'src/renderer/widget/index.html'),
       },
       output: {
         entryFileNames: 'assets/[name].js',

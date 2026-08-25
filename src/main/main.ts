@@ -1,5 +1,15 @@
 import { app, ipcMain, BrowserWindow, nativeTheme, screen, powerMonitor } from 'electron';
-import { createChipWindow, createDisplayWindow, toggleDisplayWindow, getChipWindow, destroyDisplayWindow } from './windowManager';
+import {
+  createWidgetWindow,
+  expandWidgetWindow,
+  collapseWidgetWindow,
+  showWidgetWindow,
+  hideWidgetWindow,
+  getWidgetWindow,
+  destroyWidgetWindow,
+  COLLAPSED_WIDTH,
+  COLLAPSED_HEIGHT,
+} from './windowManager';
 import { createTray, destroyTray } from './tray';
 import { loadSettings, saveSettings } from './settingsStore';
 import { startWeatherPolling, stopWeatherPolling, fetchWeather, getCachedWeather } from './weatherService';
@@ -10,15 +20,10 @@ import { Settings, WeatherData } from '../shared/types';
 let settings: Settings = loadSettings();
 
 function broadcastWeather(weather: WeatherData): void {
-  const chipWin = getChipWindow();
-  if (chipWin && !chipWin.isDestroyed()) {
-    chipWin.webContents.send(IPC_CHANNELS.WEATHER_UPDATE, weather);
+  const widgetWin = getWidgetWindow();
+  if (widgetWin && !widgetWin.isDestroyed()) {
+    widgetWin.webContents.send(IPC_CHANNELS.WEATHER_UPDATE, weather);
   }
-  BrowserWindow.getAllWindows().forEach((win) => {
-    if (!win.isDestroyed() && win !== chipWin) {
-      win.webContents.send(IPC_CHANNELS.WEATHER_UPDATE, weather);
-    }
-  });
 }
 
 function broadcastSettings(): void {
@@ -84,9 +89,9 @@ function clampToWorkArea(x: number, y: number, width: number, height: number): {
 }
 
 app.whenReady().then(() => {
-  const chipWindow = createChipWindow(settings);
+  const widgetWindow = createWidgetWindow(settings);
 
-  chipWindow.webContents.session.setPermissionRequestHandler((_, permission, callback) => {
+  widgetWindow.webContents.session.setPermissionRequestHandler((_, permission, callback) => {
     if (permission === 'geolocation') {
       callback(true);
     } else {
@@ -96,14 +101,23 @@ app.whenReady().then(() => {
 
   createTray(
     () => {
-      chipWindow.show();
-      chipWindow.focus();
+      widgetWindow.show();
+      widgetWindow.focus();
     },
     () => {
-      chipWindow.hide();
+      widgetWindow.hide();
     },
     () => {
-      toggleDisplayWindow(settings);
+      // Toggle expand/collapse
+      if (widgetWindow && !widgetWindow.isDestroyed() && widgetWindow.isVisible()) {
+        const bounds = widgetWindow.getBounds();
+        const isExpanded = bounds.height > COLLAPSED_HEIGHT;
+        if (isExpanded) {
+          collapseWidgetWindow();
+        } else {
+          expandWidgetWindow();
+        }
+      }
     },
     () => {
       app.quit();
@@ -172,7 +186,33 @@ app.whenReady().then(() => {
   });
 
   ipcMain.handle(IPC_CHANNELS.WINDOW_EXPAND, () => {
-    toggleDisplayWindow(settings);
+    const widgetWin = getWidgetWindow();
+    if (widgetWin && !widgetWin.isDestroyed() && widgetWin.isVisible()) {
+      const bounds = widgetWin.getBounds();
+      const isExpanded = bounds.height > COLLAPSED_HEIGHT;
+      if (isExpanded) {
+        collapseWidgetWindow();
+      } else {
+        expandWidgetWindow();
+      }
+    }
+  });
+
+  ipcMain.handle('widget:expand', () => {
+    expandWidgetWindow();
+  });
+
+  ipcMain.handle('widget:collapse', () => {
+    collapseWidgetWindow();
+  });
+
+  ipcMain.handle('widget:is-expanded', () => {
+    const widgetWin = getWidgetWindow();
+    if (widgetWin && !widgetWin.isDestroyed()) {
+      const bounds = widgetWin.getBounds();
+      return bounds.height > COLLAPSED_HEIGHT;
+    }
+    return false;
   });
 
   let saveSettingsTimeout: NodeJS.Timeout | null = null;
@@ -184,38 +224,27 @@ app.whenReady().then(() => {
   };
 
   ipcMain.handle(IPC_CHANNELS.CHIP_POSITION_CHANGED, (_, x: number, y: number) => {
-    const pos = clampToWorkArea(x, y, 180, 44);
-    settings.chipPosition = pos;
-    debouncedSaveSettings(settings);
-    if (chipWindow && !chipWindow.isDestroyed()) {
-      chipWindow.setBounds({ x: pos.x, y: pos.y, width: 180, height: 44 });
+    const widgetWin = getWidgetWindow();
+    if (widgetWin && !widgetWin.isDestroyed()) {
+      const bounds = widgetWin.getBounds();
+      const height = bounds.height;
+      const pos = clampToWorkArea(x, y, COLLAPSED_WIDTH, height);
+      settings.chipPosition = pos;
+      debouncedSaveSettings(settings);
+      widgetWin.setBounds({ x: pos.x, y: pos.y, width: COLLAPSED_WIDTH, height });
     }
   });
 
   ipcMain.handle('chip:get-position', () => {
-    if (chipWindow && !chipWindow.isDestroyed()) {
-      return chipWindow.getPosition();
+    const widgetWin = getWidgetWindow();
+    if (widgetWin && !widgetWin.isDestroyed()) {
+      return widgetWin.getPosition();
     }
     return [settings.chipPosition.x, settings.chipPosition.y];
   });
 
-  ipcMain.handle('display:position-changed', (event, x: number, y: number) => {
-    const win = BrowserWindow.fromWebContents(event.sender);
-    if (win && !win.isDestroyed()) {
-      win.setBounds({ x, y, width: 260, height: 260 });
-    }
-  });
-
-  ipcMain.handle('display:get-position', (event) => {
-    const win = BrowserWindow.fromWebContents(event.sender);
-    if (win && !win.isDestroyed()) {
-      return win.getPosition();
-    }
-    return [300, 100];
-  });
-
-  chipWindow.on('closed', () => {
-    destroyDisplayWindow();
+  widgetWindow.on('closed', () => {
+    destroyWidgetWindow();
   });
 
   app.on('window-all-closed', () => {
@@ -228,5 +257,5 @@ app.whenReady().then(() => {
 app.on('before-quit', () => {
   stopWeatherPolling();
   destroyTray();
-  destroyDisplayWindow();
+  destroyWidgetWindow();
 });

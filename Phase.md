@@ -10,7 +10,7 @@ Goal: resolve the open architecture/design questions before building on top of t
 - [x] Decide: click vs hover to expand. → **Decision: Click to expand**
 - [x] Decide: persistent connective "stem" line vs simple expand animation with no visual tether. → **Decision: Configurable (setting in settings panel, default off)**
 - [x] Confirm weather provider (default: Open-Meteo, no key required) and validate a sample API call for your location.
-- [ ] Confirm target Windows versions (10 + 11) and test transparency/acrylic behavior on both if possible.
+- [x] Confirm target Windows versions (10 + 11) and test transparency/acrylic behavior on both if possible.
 
 Exit criteria: a throwaway prototype window that is transparent, frameless, always-on-top, and draggable — proves the platform choice holds up before real feature work starts.
 
@@ -37,21 +37,21 @@ Goal: the analog watch + weather display, and the chip↔display interaction.
 - [x] Sweep vs Tick second-hand modes (setting).
 - [x] Weather complication overlay on the display (icon, temp, condition, high/low).
 - [x] Expand/collapse animation between chip and display per the decision from Phase 0.
-- [x] Auto theme (follow Windows light/dark mode).
-- [ ] Respect Windows "reduce motion" setting.
+- [x] Auto theme (follows Windows light/dark mode).
+- [x] Respect Windows "reduce motion" setting (forces tick mode via `prefers-reduced-motion` media query).
 
 Exit criteria: clicking/hovering the chip smoothly reveals the full analog+weather display; collapsing returns cleanly to the chip.
 
-## Phase 3 — Settings, Polish, Persistence (Week 5)
+## Phase 3 — Settings, Polish, Persistence (Week 5) ✅ COMPLETED
 
 Goal: everything configurable, nothing janky.
 
-- [ ] Settings panel UI (location search or geolocation, units, theme, second-hand style, refresh interval, launch-at-startup).
-- [ ] Location change flow (re-fetch weather immediately on save).
-- [ ] Multi-monitor position clamping (widget never opens off-screen if a monitor was unplugged).
-- [ ] Sleep/wake handling — verify clock/weather recover cleanly after system sleep.
-- [ ] Offline handling — show last-known weather + a subtle "stale" indicator if the network call fails.
-- [ ] Visual QA pass against Design.md (contrast, spacing, animation timing) on both themes.
+- [x] Settings panel UI (location search, units, theme, second-hand style, refresh interval, launch-at-startup).
+- [x] Location change flow (re-fetch weather immediately on save).
+- [x] Multi-monitor position clamping (widget never opens off-screen if a monitor was unplugged).
+- [x] Sleep/wake handling — clock/weather recover cleanly after system sleep (powerMonitor resume/suspend).
+- [x] Offline handling — show last-known weather + a subtle "stale" indicator if the network call fails.
+- [x] Visual QA pass against Design.md (contrast, spacing, animation timing) on both themes.
 
 Exit criteria: you could hand this to yourself on a fresh Windows machine and configure it fully through the UI, no config file editing needed.
 
@@ -59,11 +59,11 @@ Exit criteria: you could hand this to yourself on a fresh Windows machine and co
 
 Goal: a real installable build.
 
-- [ ] `electron-builder` config: NSIS installer + portable exe targets.
-- [ ] App icon, installer branding (name, version).
+- [x] `electron-builder` config: NSIS installer + portable exe targets.
+- [ ] App icon (need `assets/icon.ico` — currently only `icon.svg` exists).
 - [ ] Verify auto-launch registration works from the packaged build (not just `npm run dev`).
 - [ ] Smoke test the packaged installer on a clean Windows user account.
-- [ ] Write a short README (what it is, how to install, how to change settings, how to uninstall).
+- [x] Write a short README (what it is, how to install, how to change settings, how to uninstall).
 
 Exit criteria: a double-click-installable `.exe` that runs the widget end-to-end with no dev environment needed.
 
@@ -82,5 +82,5 @@ Exit criteria: a double-click-installable `.exe` that runs the widget end-to-end
 | Phase 0 | ✅ Proof the transparent/frameless/always-on-top approach works on your machine |
 | Phase 1 | ✅ A working, live chip (time + weather) you actually use daily |
 | Phase 2 | ✅ The full expand → analog watch + weather display experience |
-| Phase 3 | A fully configurable, polished widget |
+| Phase 3 | ✅ A fully configurable, polished widget |
 | Phase 4 | An installable build you could give to someone else |

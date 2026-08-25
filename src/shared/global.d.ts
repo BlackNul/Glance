@@ -6,15 +6,12 @@ export interface GlanceAPI {
   getSettings: () => Promise<Settings>;
   setSettings: (settings: Settings) => Promise<void>;
   onSettingsChanged: (callback: (settings: Settings) => void) => void;
-  toggleDisplay: () => Promise<void>;
-  onExpand: (callback: () => void) => void;
-  onCollapse: (callback: () => void) => void;
+  toggleExpand: () => Promise<void>;
+  expand: () => Promise<void>;
+  collapse: () => Promise<void>;
+  isExpanded: () => Promise<boolean>;
   setChipPosition: (x: number, y: number) => Promise<void>;
   getChipPosition: () => Promise<[number, number]>;
-  setDisplayPosition: (x: number, y: number) => Promise<void>;
-  getDisplayPosition: () => Promise<[number, number]>;
-  showContextMenu: () => Promise<void>;
-  resizeDisplay: (w: number, h: number) => Promise<void>;
   onThemeChanged: (callback: (theme: 'light' | 'dark') => void) => void;
 }
 
